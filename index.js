@@ -22,7 +22,32 @@ app.get('/', (req, res) => {
 
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
-    const productsCollection = client.db("dorakataShop").collection("products");
+    const servicesCollection = client.db("weddingArtista").collection("services");
+
+    console.log('db is connected');
+
+    app.post("/addService", (req, res) => {
+        const service = req.body;
+        console.log(service);
+        servicesCollection.insertOne(service)
+            .then(result => {
+                console.log('one added successfully');
+            })
+    })
+    app.get('/services', (req, res) => {
+        servicesCollection.find()
+            .toArray()
+            .then(services => {
+                res.send(services);
+            })
+    })
+    app.delete('/deleteService/:id', (req, res) => {
+        const id = ObjectID(req.params.id);
+        console.log('delete', id);
+        servicesCollection.findOneAndDelete({ _id: id })
+            .then(documents => res.send(!!documents.value))
+    })
+
 
 });
 

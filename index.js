@@ -23,6 +23,7 @@ app.get('/', (req, res) => {
 const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology: true });
 client.connect(err => {
     const servicesCollection = client.db("weddingArtista").collection("services");
+    const ordersCollection = client.db("weddingArtista").collection("orders");
 
     console.log('db is connected');
 
@@ -34,6 +35,7 @@ client.connect(err => {
                 console.log('one added successfully');
             })
     })
+
     app.get('/services', (req, res) => {
         servicesCollection.find()
             .toArray()
@@ -41,11 +43,29 @@ client.connect(err => {
                 res.send(services);
             })
     })
+
     app.delete('/deleteService/:id', (req, res) => {
         const id = ObjectID(req.params.id);
         console.log('delete', id);
         servicesCollection.findOneAndDelete({ _id: id })
             .then(documents => res.send(!!documents.value))
+    })
+
+    app.post("/addOrder", (req, res) => {
+        const order = req.body;
+        ordersCollection.insertOne(order)
+            .then(result => {
+                console.log(result);
+                res.send(result.insertedCount);
+            })
+    })
+
+    app.get('/orders', (req, res) => {
+        ordersCollection.find()
+            .toArray()
+            .then(orders => {
+                res.send(orders);
+            })
     })
 
 
